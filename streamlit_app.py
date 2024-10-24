@@ -18,6 +18,7 @@ from tensorflow.keras.layers import Dense
 
 st.image("URC.png", caption="LCFI-URC Universidad Rosario Castellanos", width=200)
 
+
 # Lista de acciones proporcionadas
 acciones = [
     'AC.MX', 'ACCELSAB.MX', 'ACTINVRB.MX', 'AGUA.MX', 'ALFAA.MX', 'ALPEKA.MX',
@@ -88,6 +89,13 @@ if accion:
     if st.button('Entrenar'):
         history = model.fit(X_train, y_train, epochs=50, batch_size=32, validation_data=(X_test, y_test))
         st.success('Modelo entrenado con éxito')
+
+    # Mostrar resultados del modelo
+    st.subheader('Predicciones del Modelo')
+    if st.button('Mostrar Predicciones'):
+        y_pred = model.predict(X_test)
+        pred_df = pd.DataFrame({'Real': y_test, 'Predicción': y_pred.flatten()})
+        st.write(pred_df)
 
     # Mostrar resu
 # Personalización de diseño
