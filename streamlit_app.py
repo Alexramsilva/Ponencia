@@ -8,94 +8,110 @@ Original file is located at
 """
 
 import streamlit as st
-import yfinance as yf
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dense, LeakyReLU
+import yfinance as yf
 
 st.image("URC.png", caption="LCFI-URC Universidad Rosario Castellanos", width=200)
 
 
-# Lista de acciones proporcionadas
+# Título de la app
+st.title("Predicción de Rendimiento Financiero con Red Neuronal")
+st.write("Seleccione una acción y luego ingrese los valores correspondientes a las variables del día anterior para predecir el rendimiento:")
+
+# Lista de acciones
 acciones = [
-    'AC.MX', 'ACCELSAB.MX', 'ACTINVRB.MX', 'AGUA.MX', 'ALFAA.MX', 'ALPEKA.MX',
-    'ALSEA.MX', 'AMXB.MX', 'ASURB.MX', 'AUTLANB.MX', 'AXTELCPO.MX', 'BBAJIOO.MX',
-    'BEVIDESB.MX', 'BIMBOA.MX', 'BOLSAA.MX', 'CABLECPO.MX', 'CADUA.MX', 'CERAMICB.MX',
-    'CHDRAUIB.MX', 'CIDMEGA.MX', 'CIEB.MX', 'CMOCTEZ.MX', 'CMRB.MX', 'COLLADO.MX',
-    'CONVERA.MX', 'CREAL.MX', 'CTAXTELA.MX', 'CUERVO.MX', 'CULTIBAB.MX', 'CYDSASAA.MX',
-    'DINEB.MX', 'ELEKTRA.MX', 'FEMSAUBD.MX', 'FINAMEXO.MX', 'FINDEP.MX', 'FRAGUAB.MX',
-    'GAPB.MX', 'GBMO.MX', 'GCARSOA1.MX', 'GCC.MX', 'GENTERA.MX', 'GFINBURO.MX',
-    'GFNORTEO.MX', 'GIGANTE.MX', 'GISSAA.MX', 'GMD.MX', 'GMEXICOB.MX', 'GMXT.MX',
-    'GNP.MX', 'GPROFUT.MX', 'GRUMAB.MX', 'HCITY.MX', 'HERDEZ.MX', 'HOMEX.MX',
-    'HOTEL.MX', 'ICHB.MX', 'INVEXA.MX', 'JAVER.MX', 'KIMBERA.MX', 'KOFUBL.MX',
-    'KUOB.MX', 'LABB.MX', 'LAMOSA.MX', 'LASITEB-1.MX', 'LIVEPOL1.MX', 'MEDICAB.MX',
-    'MEGACPO.MX', 'MFRISCOA-1.MX', 'MINSAB.MX', 'NEMAKA.MX', 'OMAB.MX', 'ORBIA.MX',
-    'PASAB.MX', 'PE&OLES.MX', 'PINFRAL.MX', 'POCHTECB.MX', 'POSADASA.MX', 'Q.MX',
-    'RA.MX', 'RLHA.MX', 'SIMECB.MX', 'SITES1A-1.MX', 'SORIANAB.MX', 'SPORTS.MX',
-    'TEAKCPO.MX', 'TMMA.MX', 'TRAXIONA.MX', 'URBI.MX', 'VALUEGF0.MX', 'VASCONI.MX',
-    'VESTA.MX', 'VINTE.MX', 'VISTAA.MX', 'VITROA.MX', 'VOLARA.MX', 'WALMEX.MX'
+    "AC.MX", "ACCELSAB.MX", "ACTINVRB.MX", "AGUA.MX", "ALFAA.MX", "ALPEKA.MX", "ALSEA.MX", "AMXB.MX",
+    "ASURB.MX", "AUTLANB.MX", "AXTELCPO.MX", "BBAJIOO.MX", "BEVIDESB.MX", "BIMBOA.MX", "BOLSAA.MX",
+    "CABLECPO.MX", "CADUA.MX", "CERAMICB.MX", "CHDRAUIB.MX", "CIDMEGA.MX", "CIEB.MX", "CMOCTEZ.MX",
+    "CMRB.MX", "COLLADO.MX", "CONVERA.MX", "CREAL.MX", "CTAXTELA.MX", "CUERVO.MX", "CULTIBAB.MX",
+    "CYDSASAA.MX", "DINEB.MX", "ELEKTRA.MX", "FEMSAUBD.MX", "FINAMEXO.MX", "FINDEP.MX", "FRAGUAB.MX",
+    "GAPB.MX", "GBMO.MX", "GCARSOA1.MX", "GCC.MX", "GENTERA.MX", "GFINBURO.MX", "GFNORTEO.MX",
+    "GIGANTE.MX", "GISSAA.MX", "GMD.MX", "GMEXICOB.MX", "GMXT.MX", "GNP.MX", "GPROFUT.MX",
+    "GRUMAB.MX", "HCITY.MX", "HERDEZ.MX", "HOMEX.MX", "HOTEL.MX", "ICHB.MX", "INVEXA.MX",
+    "JAVER.MX", "KIMBERA.MX", "KOFUBL.MX", "KUOB.MX", "LABB.MX", "LAMOSA.MX", "LASITEB-1.MX",
+    "LIVEPOL1.MX", "MEDICAB.MX", "MEGACPO.MX", "MFRISCOA-1.MX", "MINSAB.MX", "NEMAKA.MX",
+    "OMAB.MX", "ORBIA.MX", "PASAB.MX", "PE&OLES.MX", "PINFRAL.MX", "POCHTECB.MX", "POSADASA.MX",
+    "Q.MX", "RA.MX", "RLHA.MX", "SIMECB.MX", "SITES1A-1.MX", "SORIANAB.MX", "SPORTS.MX",
+    "TEAKCPO.MX", "TMMA.MX", "TRAXIONA.MX", "URBI.MX", "VALUEGF0.MX", "VASCONI.MX", "VESTA.MX",
+    "VINTE.MX", "VISTAA.MX", "VITROA.MX", "VOLARA.MX", "WALMEX.MX"
 ]
 
-# Título de la aplicación
-st.title('Predicción de Acciones usando Redes Neuronales')
-
-# Selección de la acción
-st.subheader('Selecciona una acción:')
-accion = st.selectbox('Acción:', acciones)
+# Seleccionar una acción de la lista
+accion_seleccionada = st.selectbox("Seleccione una acción", acciones)
 
 # Obtener datos históricos de la acción seleccionada
-@st.cache
-def cargar_datos(accion):
-    df = yf.download(accion, period="5y")
-    return df
+st.write(f"Obteniendo datos históricos para la acción: {accion_seleccionada}")
+data = yf.download(accion_seleccionada, period="1y")
 
-if accion:
-    # Cargar los datos
-    datos = cargar_datos(accion)
+# Calcular rendimientos como la variación porcentual diaria del precio de cierre
+data['Rendimiento'] = data['Close'].pct_change()
 
-    # Mostrar los datos
-    st.subheader(f'Datos históricos de {accion}')
-    st.write(datos.tail())
+st.write(data.tail())  # Muestra los últimos 5 días de datos para referencia
 
-    # Definir el target y las características (Close y Volume en este caso)
-    datos['Return'] = datos['Close'].pct_change()  # Calculamos el rendimiento
-    datos = datos.dropna()
+# Ingresar valores manualmente
+volumen = st.number_input('Volumen (V_{t-1})', min_value=0.0, step=1000.0)
+open_price = st.number_input('Precio de Apertura (O_{t-1})', min_value=0.0, step=0.1)
+close_price = st.number_input('Precio de Cierre (C_{t-1})', min_value=0.0, step=0.1)
+max_price = st.number_input('Precio Máximo (Ma_{t-1})', min_value=0.0, step=0.1)
+min_price = st.number_input('Precio Mínimo (Mi_{t-1})', min_value=0.0, step=0.1)
 
-    # Preparación de los datos para el modelo
-    X = datos[['Close', 'Volume']].values
-    y = datos['Return'].values
+# Definir la estructura de la red neuronal
+def crear_modelo_red_neuronal():
+    modelo = Sequential()
 
-    # Escalar los datos
-    scaler = MinMaxScaler()
-    X_scaled = scaler.fit_transform(X)
+    # Capa de entrada (5 entradas, correspondientes a las 5 variables)
+    modelo.add(Dense(64, input_dim=5))  # 64 neuronas
+    modelo.add(LeakyReLU(alpha=0.01))
 
-    # Dividir los datos en entrenamiento y prueba
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, shuffle=False)
+    # Primera capa oculta (5 neuronas)
+    modelo.add(Dense(5))
+    modelo.add(LeakyReLU(alpha=0.01))
 
-    # Crear el modelo de red neuronal
-    model = Sequential()
-    model.add(Dense(64, input_dim=X_train.shape[1], activation='relu'))  # Capa oculta 1
-    model.add(Dense(32, activation='relu'))  # Capa oculta 2
-    model.add(Dense(1))  # Capa de salida (predicción de rendimiento)
+    # Segunda capa oculta (3 neuronas)
+    modelo.add(Dense(3))
+    modelo.add(LeakyReLU(alpha=0.01))
+
+    # Capa de salida (1 salida, el rendimiento esperado)
+    modelo.add(Dense(1))
 
     # Compilar el modelo
-    model.compile(optimizer='adam', loss='mse')
+    modelo.compile(optimizer='adam', loss='mse')
 
-    # Entrenar el modelo
-    st.subheader('Entrenamiento del Modelo')
-    if st.button('Entrenar'):
-        history = model.fit(X_train, y_train, epochs=50, batch_size=32, validation_data=(X_test, y_test))
-        st.success('Modelo entrenado con éxito')
+    return modelo
 
-    # Mostrar resultados del modelo
-    st.subheader('Predicciones del Modelo')
-    if st.button('Mostrar Predicciones'):
-        y_pred = model.predict(X_test)
-        pred_df = pd.DataFrame({'Real': y_test, 'Predicción': y_pred.flatten()})
-        st.write(pred_df)
+# Crear el modelo
+modelo = crear_modelo_red_neuronal()
+
+# Definir la función para predecir el rendimiento
+def predecir_rendimiento(volumen, open_price, close_price, max_price, min_price):
+    # Crear un array de entrada con los valores ingresados
+    input_data = np.array([[volumen, open_price, close_price, max_price, min_price]])
+
+    # Realizar la predicción usando el modelo
+    predicted_rendimiento = modelo.predict(input_data)
+
+    return predicted_rendimiento
+
+# Preparar los datos de entrenamiento
+X_train = data[['Volume', 'Open', 'Close', 'High', 'Low']].values[1:]  # Entradas: datos menos el primer día (ya que pct_change introduce un NaN en el primer día)
+y_train = data['Rendimiento'].values[1:]  # Rendimiento como variable objetivo
+
+# Remover cualquier NaN en el dataset (por ejemplo, por días festivos o errores)
+X_train = X_train[~np.isnan(y_train)]
+y_train = y_train[~np.isnan(y_train)]
+
+# Entrenar el modelo con los datos históricos
+modelo.fit(X_train, y_train, epochs=50, verbose=0)  # Entrenar el modelo
+
+# Realizar la predicción cuando el usuario haga clic en el botón
+if st.button('Predecir Rendimiento'):
+    rendimiento = predecir_rendimiento(volumen, open_price, close_price, max_price, min_price)
+    st.write(f'El rendimiento esperado para {accion_seleccionada} es: {rendimiento[0][0]:.4f}')
+
 
     # Mostrar resu
 # Personalización de diseño
