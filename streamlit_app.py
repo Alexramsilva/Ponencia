@@ -114,6 +114,8 @@ if st.button('Predecir Rendimiento'):
 
 st.write("Aviso (Disclaimer): Este ejemplo sólo tiene fines ilustrativos y académicos. No representa una recomendación de estategia de inversión financiera.")
 
+url_gif = "https://github.com/Alexramsilva/Ponencia/blob/main/gif.gif"
+st.image(url_gif)
     # Mostrar resu
 # Personalización de diseño
 st.markdown("""
@@ -144,3 +146,4 @@ st.markdown("""
         </p>
     </div>
 """, unsafe_allow_html=True)
+
