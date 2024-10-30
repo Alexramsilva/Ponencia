@@ -112,6 +112,7 @@ if st.button('Predecir Rendimiento'):
     rendimiento = predecir_rendimiento(volumen, open_price, close_price, max_price, min_price)
     st.write(f'El rendimiento esperado para {accion_seleccionada} es: {rendimiento[0][0]:.4f}')
 
+st.write("Aviso (Disclaimer): Este ejemplo sólo tiene fines ilustrativos y académicos. No representa una recomendación de estategia de inversión financiera.")
 
     # Mostrar resu
 # Personalización de diseño
