@@ -113,10 +113,8 @@ if st.button('Predecir Rendimiento'):
     st.write(f'El rendimiento esperado para {accion_seleccionada} es: {rendimiento[0][0]:.4f}')
 
 st.write("Aviso (Disclaimer): Este ejemplo sólo tiene fines ilustrativos y académicos. No representa una recomendación de estategia de inversión financiera.")
-
-url_gif = "https://github.com/Alexramsilva/Ponencia/blob/main/gif.gif"
-st.image(url_gif)
-    # Mostrar resu
+st.image(gif.gif)
+    # Mostrar resultado
 # Personalización de diseño
 st.markdown("""
 <style>
