@@ -113,7 +113,22 @@ if st.button('Predecir Rendimiento'):
     st.write(f'El rendimiento esperado para {accion_seleccionada} es: {rendimiento[0][0]:.4f}')
 
 st.write("Aviso (Disclaimer): Este ejemplo sólo tiene fines ilustrativos y académicos. No representa una recomendación de estategia de inversión financiera.")
-st.image(gif.gif)
+st.markdown(
+    """
+    <style>
+    .centered-image {
+        display: flex;
+        justify-content: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Usar st.image dentro de un contenedor centrado
+st.markdown('<div class="centered-image">', unsafe_allow_html=True)
+st.image("gif.gif", use_column_width=False, width=200)  # Ajusta el ancho según prefieras
+st.markdown('</div>', unsafe_allow_html=True)
     # Mostrar resultado
 # Personalización de diseño
 st.markdown("""
